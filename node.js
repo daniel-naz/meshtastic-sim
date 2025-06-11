@@ -2,17 +2,21 @@ import { global } from "./globals.js"
 import utils from "./utils.js"
 
 function createNodeModel() {
-    const modeltext = `<line x1="16" y1="80" x2="32" y2="32" stroke="black" stroke-width="2" fill="none"/>
-        <line x1="32" y1="32" x2="48" y2="80" stroke="black" stroke-width="2" fill="none"/>
-        <circle cx="32" cy="32" r="16" stroke="black" stroke-width="2" fill="none"/>
-        <circle cx="32" cy="32" r="22.627416997969522" stroke="black" stroke-width="2" fill="none"/>
-        <circle cx="32" cy="32" r="32" stroke="black" stroke-width="2" fill="none"/>
-        <line x1="16" y1="80" x2="48" y2="80" stroke="black" stroke-width="2" fill="none"/>`
+    const modeltext = `<line x1="-16" y1="48" x2="0" y2="0" stroke="black" stroke-width="2" fill="none"/>
+        <line x1="0" y1="0" x2="16" y2="48" stroke="black" stroke-width="2" fill="none"/>
+        <circle cx="0" cy="0" r="16" stroke="black" stroke-width="2" fill="none"/>
+        <circle cx="0" cy="0" r="24" stroke="black" stroke-width="2" fill="none"/>
+        <circle cx="0" cy="0" r="32" stroke="black" stroke-width="2" fill="none"/>
+        <circle cx="0" cy="0" r="40" fill="transparent"/>
+        <line x1="-16" y1="48" x2="16" y2="48" stroke="black" stroke-width="2" fill="none"/>`
 
     const element = utils.svg.createSvgFromText(modeltext)
     return element
 }
 
+/**
+ * @returns {SVGElement}
+ */
 function cloneModel() {
     return model.cloneNode(true)
 }
@@ -35,7 +39,31 @@ function generateNodeId() {
     return '!' + base64;
 }
 
+function onModelEnter(node) {
+    for (const e of nodeRangeModels) {
+        e.parentElement.removeChild(e)
+    }
+    nodeRangeModels.length = 0
+
+    const modeltext = `<circle cx="0" cy="0" r="${node.maxRangeKm() * global.GRID.SIZE}" fill="url(#grad1)"/>`
+    const element = utils.svg.createSvgFromText(modeltext)
+    element.setAttribute('transform', `translate(${node.position.x * 100}, ${node.position.y * 100})`)
+    nodeRangeModels.push(element)
+
+    const svg = node.model.parentElement
+    svg.insertBefore(element, svg.firstChild);
+}
+
+function onModelLeave() {
+    for (const e of nodeRangeModels) {
+        e.parentElement.removeChild(e)
+    }
+    nodeRangeModels.length = 0
+}
+
 const model = createNodeModel()
+
+const nodeRangeModels = []
 
 export class Node {
     constructor(network, txDbm = 20, TTL = 600_000, position = { x: 0, y: 0 }) {
@@ -53,6 +81,13 @@ export class Node {
         this.model = cloneModel()
         this.model.setAttribute('transform', `scale(1) translate(${position.x * global.GRID.SIZE * 100}, ${position.y * global.GRID.SIZE * 100})`)
 
+        const node = this
+        this.model.addEventListener('mouseenter', (e) => {
+            onModelEnter(node)
+        })
+        this.model.addEventListener('mouseleave', (e) => {
+            onModelLeave()
+        })
         this.txDbm = txDbm
     }
 
@@ -70,8 +105,7 @@ export class Node {
         const exponent = (linkBudget - PL_d0 - A_env) / (20 * 1);
 
         const d = Math.pow(10, exponent);
-        console.log(d);
-        
+
         return d; // in km
     }
 

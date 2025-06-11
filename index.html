@@ -1,6 +1,6 @@
 <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Logic Gate Editor</title>
+    <title>Meshtastic simulator</title>
     <style>
         body {
             margin: 0;
@@ -164,6 +164,13 @@
     </div>
 
     <svg id="canvas">
+        <defs>
+            <radialGradient id="grad1" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#2DED12" stop-opacity="0.6" />
+            <stop offset="100%" stop-color="#ED122D" stop-opacity="0.4" />
+            </radialGradient>
+        </defs>
+
         <g id="grid-layer"></g>
         <g id="content-layer">
             <circle cx="0" cy="0" r="4" fill="red" />
