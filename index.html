@@ -1,101 +1,134 @@
 <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Meshtastic simulator</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: sans-serif;
-            overflow: hidden;
-        }
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Meshtastic simulator</title>
+<style>
+    body {
+        margin: 0;
+        font-family: sans-serif;
+        overflow: hidden;
+    }
 
-        .menu-bar {
-            display: flex;
-            background-color: #333;
-            padding: 0.5em 1em;
-            position: absolute;
-            width: 100%;
-            z-index: 10;
-            gap: 1em;
-        }
+    .menu-bar {
+        display: flex;
+        background-color: #333;
+        padding: 0.5em 1em;
+        position: absolute;
+        width: 100%;
+        z-index: 10;
+        gap: 1em;
+    }
 
-        .dropdown {
-            position: relative;
-        }
+    .dropdown {
+        position: relative;
+    }
 
-        .dropbtn {
-            background-color: #333;
-            color: white;
-            padding: 0.5em 1em;
-            border: none;
-            cursor: pointer;
-        }
+    .dropbtn {
+        background-color: #333;
+        color: white;
+        padding: 0.5em 1em;
+        border: none;
+        cursor: pointer;
+    }
 
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: #444;
-            min-width: 200px;
-            z-index: 20;
-        }
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #444;
+        min-width: 200px;
+        z-index: 20;
+    }
 
-        .dropdown-content a {
-            color: white;
-            padding: 0.5em 1em;
-            text-decoration: none;
-            display: block;
-        }
+    .dropdown-content a {
+        color: white;
+        padding: 0.5em 1em;
+        text-decoration: none;
+        display: block;
+    }
 
-        .dropdown-content a:hover {
-            background-color: #555;
-        }
+    .dropdown-content a:hover {
+        background-color: #555;
+    }
 
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
 
-        /* Align one dropdown to the right */
-        .menu-bar .align-right {
-            margin-left: auto;
-            display: flex;
-            gap: 1em;
-            padding-right: 1em; /* Ensures space from right edge */
-        }
+    /* Align one dropdown to the right */
+    .menu-bar .align-right {
+        margin-left: auto;
+        display: flex;
+        gap: 1em;
+        padding-right: 1em;
+        /* Ensures space from right edge */
+    }
 
 
-        /* Canvas area */
-        svg {
-            display: block;
-            width: 100vw;
-            height: 100vh;
-            background-color: #f0f0f0;
-            cursor: default;
-        }
+    /* Canvas area */
+    svg {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+        background-color: #f0f0f0;
+        cursor: default;
+    }
 
-        svg.panning {
-            cursor: grabbing;
-        }
+    svg.panning {
+        cursor: grabbing;
+    }
 
-        .grid-line {
-            stroke: #ccc;
-            stroke-width: 0.5;
-        }
+    .grid-line {
+        stroke: #ccc;
+        stroke-width: 0.5;
+    }
 
-        /* Consistent button style */
-        .button {
-            background-color: #333;
-            color: white;
-            border: none;
-            padding: 0.5em 1em;
-            cursor: pointer;
-            font-size: 1em;
-            border-radius: 4px;
-            transition: background-color 0.2s;
-        }
+    /* Consistent button style */
+    .button {
+        background-color: #333;
+        color: white;
+        border: none;
+        padding: 0.5em 1em;
+        cursor: pointer;
+        font-size: 1em;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+    }
 
-        .button:hover {
-            background-color: #555;
-        }
-    </style>
+    .button:hover {
+        background-color: #555;
+    }
+
+
+    #simEditorModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    #simEditorContent {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        width: 300px;
+        box-shadow: 0 0 10px black;
+    }
+
+    #simEditorModal label {
+        display: block;
+        margin-top: 10px;
+    }
+
+    #simEditorModal button {
+        margin-top: 15px;
+        margin-right: 10px;
+    }
+</style>
 </head>
 
 <body>
@@ -105,14 +138,40 @@
     <svg id="canvas">
         <defs>
             <radialGradient id="grad1" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#2DED12" stop-opacity="0.8" />
-            <stop offset="100%" stop-color="#ED122D" stop-opacity="0.1" />
+                <stop offset="0%" stop-color="#2DED12" stop-opacity="0.8" />
+                <stop offset="100%" stop-color="#ED122D" stop-opacity="0.1" />
             </radialGradient>
         </defs>
         <g id="grid-layer"></g>
         <g id="zoomLayer" transform="scale(1)">
         </g>
     </svg>
+
+    <!-- Modal -->
+    <div id="simEditorModal">
+        <div id="simEditorContent">
+            <h3>Edit Simulation</h3>
+            <label>
+                Hop count:
+                <input type="number" id="hopCount" value="3" max="10" min="1">
+            </label>
+            <label>
+                Packet count:
+                <input type="number" id="packetCount" value="100" max="1000" min="1">
+            </label>
+            <label>
+                Seed:
+                <input type="number" id="currentSeed" value="100" max="99999" min="1">
+            </label>
+            <label>
+                Transmmit power:
+                <input type="range" id="powerRange" min="15" max="30" value="20">
+                <span id="transmitPower">25</span>
+            </label>
+            <button id="settingSubmitBtn" onclick="submitSimulationChanges()">Apply</button>
+            <button id="settingCancelBtn" onclick="closeSimulationEditor()">Cancel</button>
+        </div>
+    </div>
 
     <script src="main.js" type="module"></script>
 </body>

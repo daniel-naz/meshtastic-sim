@@ -66,11 +66,13 @@ const model = createNodeModel()
 const nodeRangeModels = []
 
 export class Node {
-    constructor(network, txDbm = 20, TTL = 600_000, position = { x: 0, y: 0 }) {
+    constructor(network, txDbm = 20, hops = 3, position = { x: 0, y: 0 }) {
         this.id = generateNodeId()
 
         this.seenMessages = new Map()
-        this.ttl = TTL
+        this.ttl = 600_000
+
+        this.hops = hops
 
         this.network = network
         this.position = {
@@ -99,14 +101,14 @@ export class Node {
 
     maxRangeKm() {
         const PL_d0 = 32.44 + 20 * Math.log10(915); // FSPL at 1 m
-        const linkBudget = 20 + 0 + 0 - 2 - -130;
+
+        const linkBudget = this.txDbm + 0 + 0 - 2 - -130;
         const A_env = 30
 
         const exponent = (linkBudget - PL_d0 - A_env) / (20 * 1);
-
         const d = Math.pow(10, exponent);
 
-        return d; // in km
+        return d;
     }
 
     canReach(node) {
