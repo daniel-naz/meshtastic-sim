@@ -1,0 +1,220 @@
+<meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Logic Gate Editor</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: sans-serif;
+            overflow: hidden;
+        }
+
+        .menu-bar {
+            display: flex;
+            background-color: #333;
+            padding: 0.5em 1em;
+            position: absolute;
+            width: 100%;
+            z-index: 10;
+            gap: 1em;
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropbtn {
+            background-color: #333;
+            color: white;
+            padding: 0.5em 1em;
+            border: none;
+            cursor: pointer;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #444;
+            min-width: 200px;
+            z-index: 20;
+        }
+
+        .dropdown-content a {
+            color: white;
+            padding: 0.5em 1em;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #555;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Align one dropdown to the right */
+        .menu-bar .align-right {
+            margin-left: auto;
+            display: flex;
+            gap: 1em;
+            padding-right: 1em; /* Ensures space from right edge */
+        }
+
+
+        /* Canvas area */
+        svg {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            background-color: #f0f0f0;
+            cursor: default;
+        }
+
+        svg.panning {
+            cursor: grabbing;
+        }
+
+        .grid-line {
+            stroke: #ccc;
+            stroke-width: 0.5;
+        }
+
+        /* Popup styles */
+        .dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .dialog-box {
+            background-color: white;
+            padding: 1em;
+            border-radius: 8px;
+            min-width: 300px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .dialog-box h2 {
+            margin-top: 0;
+        }
+
+        .dialog-box input {
+            width: 60px;
+            margin-right: 1em;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-top: 1em;
+        }
+
+        th,
+        td {
+            border: 1px solid #999;
+            padding: 0.3em 0.6em;
+            text-align: center;
+        }
+
+        /* Consistent button style */
+        .button {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 0.5em 1em;
+            cursor: pointer;
+            font-size: 1em;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .button:hover {
+            background-color: #555;
+        }
+
+        .selected-border * {
+            paint-order: stroke fill; /* stroke painted before fill, allows multiple strokes */
+            stroke-width: 3;          /* original stroke */
+            stroke: #2ab1ff;     
+        }
+
+        .selected-border {
+            paint-order: stroke fill; /* stroke painted before fill, allows multiple strokes */
+            stroke-width: 3;          /* original stroke */
+            stroke: #2ab1ff;     
+        }
+    </style>
+</head>
+
+<body>
+    <div id="topmenu" class="menu-bar">
+
+        <!-- <div class="dropdown align-right">
+            <button id="simulateBtn" class="button">Simulate</button>
+        </div> -->
+    </div>
+
+    <svg id="canvas">
+        <g id="grid-layer"></g>
+        <g id="content-layer">
+            <circle cx="0" cy="0" r="4" fill="red" />
+        </g>
+
+        <g id="zoomLayer" transform="scale(1)">
+            
+        </g>
+    </svg>
+
+    <!-- Truth table popup -->
+    <div class="dialog-overlay" id="truthDialog">
+        <div class="dialog-box">
+            <h2>Component from Truth Table</h2>
+
+            <label>Inputs:
+                <input type="number" id="inputCount" min="1" max="4" value="2">
+            </label>
+
+            <label>Outputs:
+                <input type="number" id="outputCount" min="1" max="8" value="2">
+            </label>
+
+            <div id="truthTableContainer" style="margin-bottom: 1em;"></div>
+
+            <!-- SVG preview container -->
+            <div style="display: flex; gap: 1em; height: 100%; align-items: center;">
+                <!-- Truth table on the left -->
+                <div style="flex: 1;">
+                    <div id="truthTableContainer"></div>
+                </div>
+
+                <!-- SVG preview on the right -->
+                <div style="min-height: 128px; height: 100%; display: flex; align-items: center;">
+                    <svg id="componentPreview" width="200"
+                        style="min-height: 128px; height: 100%; max-height: 100%; border: 1px solid #ccc; background: #f9f9f9;">
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Buttons container -->
+            <div style="display: flex; justify-content: space-between;">
+                <button id="editComponentBtn">Edit scheme</button>
+                <button id="createComponentBtn">Create</button>
+            </div>
+        </div>
+
+    </div>
+        
+    <script src="https://cdn.jsdelivr.net/npm/pako@latest/dist/pako.min.js"></script>
+    <script src="main.js" type="module"></script>
+</body>
+
+</html>
