@@ -154,20 +154,69 @@ var network = new Network(
 utils.menu.createMenuDropdownButton('Simulation', 'Track packet', () => {
     const result = prompt("Enter packet id : ", 0)
 
+    for (const l of removelines) {
+        zoomLayer.removeChild(l)
+    }
+    removelines.clear()
+
     if (!Number(result)) {
         alert("Enter a packet id (number).")
         return
     }
-    
+
     const value = Number(result)
-    
+
     if (0 >= value || value >= 100) {
         alert("Packet id out of range.")
         return
     }
 
-    
+    if (network.packectPaths.get(value).length == 0) {
+        alert("Run the simulation.")
+        return
+    }
+
+    const srccircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    const { x1, y1, x2, y2 } = network.packectPaths.get(value)[0]
+    srccircle.setAttribute("cx", x1 * 100);
+    srccircle.setAttribute("cy", y1 * 100);
+    srccircle.setAttribute("r", 32);
+    srccircle.setAttribute("fill", "green");
+    removelines.add(srccircle)
+    zoomLayer.insertBefore(srccircle, zoomLayer.firstChild)
+
+    const destcircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    const destnode = network.packectDest.get(value)
+    destcircle.setAttribute("cx", destnode.position.x * 100);
+    destcircle.setAttribute("cy", destnode.position.y * 100);
+    destcircle.setAttribute("r", 32);
+    destcircle.setAttribute("fill", "blue");
+    removelines.add(destcircle)
+    zoomLayer.insertBefore(destcircle, zoomLayer.firstChild)
+
+
+    drawLinesToSVG(network.packectPaths.get(value), zoomLayer)
 })
+
+const removelines = new Set();
+
+function drawLinesToSVG(lines, svgElement) {
+    lines.forEach(({ x1, y1, x2, y2 }) => {
+        x1 = x1 * 100
+        y1 = y1 * 100
+        x2 = x2 * 100
+        y2 = y2 * 100
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", x1);
+        line.setAttribute("y1", y1);
+        line.setAttribute("x2", x2);
+        line.setAttribute("y2", y2);
+        line.setAttribute("stroke", "red");
+        line.setAttribute("stroke-width", "2");
+        removelines.add(line)
+        svgElement.appendChild(line);
+    });
+}
 
 utils.menu.createMenuDropdownButton('Simulation', 'Create link', () => {
     const encoded = utils.encode.encodePropsToBase64(currentProps)
@@ -177,7 +226,6 @@ utils.menu.createMenuDropdownButton('Simulation', 'Create link', () => {
     navigator.clipboard.writeText(fullUrl)
         .then(() => {
             console.log("Copied to clipboard:", fullUrl);
-
             alert(`Link created and ready to share!`)
         })
         .catch(err => {
@@ -188,6 +236,11 @@ utils.menu.createMenuDropdownButton('Simulation', 'Create link', () => {
 utils.menu.createMenuDropdownButton('Simulation', 'Clear seed', () => {
     network.clear()
     currentProps.seed = 0
+
+    for (const l of removelines) {
+        zoomLayer.removeChild(l)
+    }
+    removelines.clear()
 })
 
 utils.menu.createMenuDropdownButton('Simulation', 'Settings', () => {
@@ -280,7 +333,7 @@ if (encodedConfig) {
         for (const n of network.nodes) {
             zoomLayer.appendChild(n.model)
         }
-    }catch {
+    } catch {
         alert("Invalid config data.")
     }
 }

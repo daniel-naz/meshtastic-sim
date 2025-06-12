@@ -45,9 +45,8 @@ function onModelEnter(node) {
     }
     nodeRangeModels.length = 0
 
-    const modeltext = `<circle cx="0" cy="0" r="${node.maxRangeKm() * global.GRID.SIZE}" fill="url(#grad1)"/>`
+    const modeltext = `<circle cx="${node.position.x * 100}" cy="${node.position.y * 100}" r="${node.maxRangeKm() * global.GRID.SIZE}" fill="url(#grad1)"/>`
     const element = utils.svg.createSvgFromText(modeltext)
-    element.setAttribute('transform', `translate(${node.position.x * 100}, ${node.position.y * 100})`)
     nodeRangeModels.push(element)
 
     const svg = node.model.parentElement
@@ -104,8 +103,8 @@ export class Node {
     }
 
     distanceTo(node) {
-        const dx = this.position.x - node.position.x;
-        const dy = this.position.y - node.position.y;
+        const dx = this.position.x * 100 - node.position.x * 100;
+        const dy = this.position.y * 100 - node.position.y * 100;
         return Math.sqrt(dx * dx + dy * dy);
     }
 
@@ -123,7 +122,7 @@ export class Node {
 
     canReach(node) {
         const dist = this.distanceTo(node);
-        return dist <= this.maxRangeKm();
+        return dist <= this.maxRangeKm() * global.GRID.SIZE;
     }
 
     decideIfBusy(ms) {
@@ -135,7 +134,6 @@ export class Node {
         }
     }
 
-
     removeExpiredMessages(currentTime) {
         for (const [id, time] of this.seenMessages) {
             if (currentTime - time > this.ttl) {
@@ -144,13 +142,13 @@ export class Node {
         }
     }
 
-    hasSeen(msg) {
-        this.removeExpiredMessages(1000)
+    hasSeen(msg, ms) {
+        this.removeExpiredMessages(ms)
         return this.seenMessages.has(msg.id)
     }
 
-    markSeen(msg) {
-        this.seenMessages.set(msg.id, 0)
+    markSeen(msg, ms) {
+        this.seenMessages.set(msg.id, ms)
     }
 
     send(receiver, payload, ms) {
@@ -170,6 +168,7 @@ export class Node {
         )
 
         if (this.ignoretiming) {
+            this.network.packectDest.set(msg.id, receiver)
             this.network.broadcast(this, msg, ms)
             return true
         }
@@ -177,49 +176,88 @@ export class Node {
             this.decideIfBusy(ms)
             if (!this.busy) {
                 this.busyuntil = ms + sendtime
+                this.network.packectDest.set(msg.id, receiver)
                 this.network.broadcast(this, msg, ms + sendtime)
                 return true
             }
         }
 
+        console.log('not send');
+
+        this.network.messageId--
         return false
     }
 
     receive(sender, msg, ms) {
-        if (this.ignoretiming) {
-            if (this.hasSeen(msg)) return;
-            this.markSeen(msg)
+        if (this.hasSeen(msg, ms)) return;
+        this.markSeen(msg, ms)
 
+        if (this.ignoretiming) {
             if (msg.to == this.id) {
                 this.network.successes++
-                return true
+                this.network.packectPaths.get(msg.id).push({
+                    x1: sender.position.x,
+                    y1: sender.position.y,
+                    x2: this.position.x,
+                    y2: this.position.y,
+                })
             }
-            else if (msg.to != this.id && msg.hops > 1) {
+            else if (msg.to != this.id && msg.hops > 0) {
                 msg = { ...msg, hops: msg.hops - 1 }
-                return this.network.broadcast(this, msg, ms)
+                this.network.packectPaths.get(msg.id).push({
+                    x1: sender.position.x,
+                    y1: sender.position.y,
+                    x2: this.position.x,
+                    y2: this.position.y,
+                })
+                this.network.broadcast(this, msg, ms)
+            }
+            else {
+                this.network.packectPaths.get(msg.id).push({
+                    x1: sender.position.x,
+                    y1: sender.position.y,
+                    x2: this.position.x,
+                    y2: this.position.y,
+                })
             }
         }
         else {
             const sendtime = calculateTimeToSend(JSON.stringify(msg).length)
+
             this.decideIfBusy(ms)
 
             if (!this.busy) {
-                if (this.hasSeen(msg)) return;
-                this.markSeen(msg)
-
                 this.busyuntil = ms + sendtime
                 // fix busy to stack up + add random delays
                 if (msg.to == this.id) {
                     this.network.successes++
-                    return true
+                    this.network.packectPaths.get(msg.id).push({
+                        x1: sender.position.x,
+                        y1: sender.position.y,
+                        x2: this.position.x,
+                        y2: this.position.y,
+                    })
                 }
-                else if (msg.to != this.id && msg.hops > 1) {
+                else if (msg.to != this.id && msg.hops > 0) {
                     msg = { ...msg, hops: msg.hops - 1 }
-                    return this.network.broadcast(this, msg, this.busyuntil + sendtime)
+                    this.network.packectPaths.get(msg.id).push({
+                        x1: sender.position.x,
+                        y1: sender.position.y,
+                        x2: this.position.x,
+                        y2: this.position.y,
+                    })
+                    this.network.broadcast(this, msg, this.busyuntil + sendtime)
+                }
+                else {
+                    this.network.packectPaths.get(msg.id).push({
+                        x1: sender.position.x,
+                        y1: sender.position.y,
+                        x2: this.position.x,
+                        y2: this.position.y,
+                    })
                 }
             }
         }
-        return false
     }
 
     dispose() {

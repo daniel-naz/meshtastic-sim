@@ -9,7 +9,7 @@ const gridLayer = document.getElementById("grid-layer");
 let isPanning = false;
 let start = { x: 0, y: 0 };
 let viewBox = { x: 0, y: 0, w: 1000, h: 1000 };
-const canvasSize = 4000 
+const canvasSize = 4000
 const cameraBounds = { xMin: -canvasSize, xMax: canvasSize, yMin: -canvasSize, yMax: canvasSize };
 
 let gridNeedsRedraw = false;
@@ -95,7 +95,7 @@ function startPanning(e) {
 
 function updatePanning(e) {
     if (!isPanning) return;
-    svg.classList.add("panning"); 
+    svg.classList.add("panning");
     const dx = (e.clientX - start.x) * (viewBox.w / svg.clientWidth);
     const dy = (e.clientY - start.y) * (viewBox.h / svg.clientHeight);
     viewBox.x -= dx;
@@ -106,7 +106,7 @@ function updatePanning(e) {
 
 function stopPanning(e) {
     isPanning = false;
-    svg.classList.remove("panning"); 
+    svg.classList.remove("panning");
 }
 
 function resizeCanvas() {
@@ -122,7 +122,7 @@ function resizeCanvas() {
 }
 
 function getCurrentZoom() {
-    const baseWidth = 1000; 
+    const baseWidth = 1000;
     return baseWidth / viewBox.w;
 }
 
