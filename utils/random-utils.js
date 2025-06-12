@@ -10,7 +10,7 @@ class Xorshift32 {
         x ^= x >>> 17;
         x ^= x << 5;
         this.state = x >>> 0;
-        return this.state / 0xFFFFFFFF;
+        return this.state / 0x100000000;
     }
 }
 
@@ -25,8 +25,18 @@ function generateNodeId() {
     return '!' + base64;
 }
 
+function randomString(random, min = 5, max = 1000) {
+    const length = Math.floor(random.next() * (max - min + 1)) + min;
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(random.next() * chars.length));
+    }
+    return result;
+}
 
 export default {
     createSeeded,
-    generateNodeId
+    generateNodeId,
+    randomString
 }

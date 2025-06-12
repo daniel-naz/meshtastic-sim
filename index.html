@@ -124,9 +124,18 @@
         margin-top: 10px;
     }
 
-    #simEditorModal button {
+    #simEditorModal .editorbutton {
         margin-top: 15px;
         margin-right: 10px;
+    }
+
+    #simEditorContent .selectlabel {
+        display: inline;
+        padding-right: 4px;
+    }
+
+    #simEditorContent select {
+        margin-top: 4px;
     }
 </style>
 </head>
@@ -150,26 +159,62 @@
     <!-- Modal -->
     <div id="simEditorModal">
         <div id="simEditorContent">
-            <h3>Edit Simulation</h3>
+            <h3>Network properties</h3>
+            <label>
+                Node count:
+                <input type="number" id="nodeCount" value="100" max="500" min="2">
+            </label>
+
+            <label class="selectlabel" for="bwselect">Network BW</label>
+            <select id="bwselect" name="bwselect">
+                <option value="125">125</option>
+                <option value="250">250</option>
+                <option value="500">500</option>
+            </select>
+            <br>
+
+            <label class="selectlabel" for="sfselect">Network SF</label>
+            <select id="sfselect" name="sfselect">
+                <option value="sf7">sf7</option>
+                <option value="sf8">sf8</option>
+                <option value="sf9">sf9</option>
+                <option value="sf10">sf10</option>
+                <option value="sf11">sf11</option>
+                <option value="sf12">sf12</option>
+            </select>
+            <br>
+
+            <label class="selectlabel" for="crselect">Network SF</label>
+            <select id="crselect" name="crselect">
+                <option value="0.5">0.5</option>
+                <option value="0.8">0.8</option>
+            </select>
+
+            <h3>Simulation properties</h3>
             <label>
                 Hop count:
                 <input type="number" id="hopCount" value="3" max="10" min="1">
             </label>
             <label>
                 Packet count:
-                <input type="number" id="packetCount" value="100" max="1000" min="1">
+                <input type="number" id="packetCount" value="100" max="5000" min="1">
             </label>
             <label>
                 Seed:
                 <input type="number" id="currentSeed" value="100" max="99999" min="1">
+                <span><button id="randomSeedBtn">Random seed</button></span>
             </label>
             <label>
                 Transmmit power:
                 <input type="range" id="powerRange" min="15" max="30" value="20">
                 <span id="transmitPower">25</span>
             </label>
-            <button id="settingSubmitBtn" onclick="submitSimulationChanges()">Apply</button>
-            <button id="settingCancelBtn" onclick="closeSimulationEditor()">Cancel</button>
+            <label>
+                <input type="checkbox" id="ignoreTiming" checked>
+                Ignore Timing
+            </label>
+            <button class="editorbutton" id="settingSubmitBtn">Apply</button>
+            <button class="editorbutton" id="settingCancelBtn">Cancel</button>
         </div>
     </div>
 

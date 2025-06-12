@@ -10,7 +10,7 @@ export class Time {
         this.#currentTime += this.#tickTime
     }
 
-    get currentTime() {
+    get currentMs() {
         return this.#currentTime
     }
 
