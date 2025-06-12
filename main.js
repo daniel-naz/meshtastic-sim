@@ -166,8 +166,7 @@ utils.menu.createMenuDropdownButton('Simulation', 'Track packet', () => {
         return
     }
 
-
-    /// tarce packet here
+    
 })
 
 utils.menu.createMenuDropdownButton('Simulation', 'Create link', () => {

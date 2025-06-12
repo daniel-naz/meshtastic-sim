@@ -59,6 +59,7 @@ export class Network {
         }
 
         this.messageId = 1
+        this.packectPaths = new Map()
     }
 
     reset() {
@@ -98,7 +99,7 @@ export class Network {
     broadcast(src, msg, now) {
         for (const n of this.nodes) {
             if (!src.canReach(n)) continue;
-            n.receive(msg, now)
+            n.receive(src, msg, now)
         }
     }
 

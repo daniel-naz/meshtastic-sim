@@ -163,7 +163,11 @@ export class Node {
             timestamp: ms,
         };
 
-        const sendtime = calculateTimeToSend(JSON.stringify(msg).length)
+        const sendtime = calculateTimeToSend(JSON.stringify(msg).length,
+            Number(this.network.sf.slice(2)),
+            this.network.bw,
+            this.network.cr,
+        )
 
         if (this.ignoretiming) {
             this.network.broadcast(this, msg, ms)
@@ -181,7 +185,7 @@ export class Node {
         return false
     }
 
-    receive(msg, ms) {
+    receive(sender, msg, ms) {
         if (this.ignoretiming) {
             if (this.hasSeen(msg)) return;
             this.markSeen(msg)
