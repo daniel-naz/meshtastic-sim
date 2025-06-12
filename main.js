@@ -154,11 +154,17 @@ var network = new Network(
 utils.menu.createMenuDropdownButton('Simulation', 'Track packet', () => {
     const result = prompt("Enter packet id : ", 0)
 
-    if (!Number(result)) alert("Enter a packet id (number).")
+    if (!Number(result)) {
+        alert("Enter a packet id (number).")
+        return
+    }
     
     const value = Number(result)
     
-    if (0 >= value || value >= 100) alert("Packet id out of range.")
+    if (0 >= value || value >= 100) {
+        alert("Packet id out of range.")
+        return
+    }
 
 
     /// tarce packet here
